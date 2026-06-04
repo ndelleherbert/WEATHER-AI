@@ -30,9 +30,29 @@ export default function Dashboard() {
         ai_style: "detailed",
       });
 
-      setData(res);
+      // ✅ NORMALIZED RESPONSE (FIX FOR RULES / AI / HYBRID)
+      setData({
+        mode: res.mode,
+        weather: res.weather,
+
+        // rules can come from:
+        // - res.rules (hybrid)
+        // - res.result (rules mode)
+        // - res.result (fallback)
+        rules:
+          res.rules ||
+          (res.result?.risk ? res.result : null),
+
+        // ai can come from:
+        // - res.ai (hybrid)
+        // - res.result (ai mode)
+        ai:
+          res.ai ||
+          (res.result?.summary ? res.result : null),
+      });
+
     } catch (err) {
-      console.error(err);
+      console.error("Weather fetch error:", err);
     }
 
     setLoading(false);
@@ -42,6 +62,8 @@ export default function Dashboard() {
     setLat(newLat);
     setLon(newLon);
   };
+
+  const forecastList = data?.weather?.data;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -63,21 +85,21 @@ export default function Dashboard() {
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={lat}
-            onChange={(e) => setLat(e.target.value)}
+            onChange={(e) => setLat(Number(e.target.value))}
             placeholder="Latitude"
           />
 
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={lon}
-            onChange={(e) => setLon(e.target.value)}
+            onChange={(e) => setLon(Number(e.target.value))}
             placeholder="Longitude"
           />
 
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={days}
-            onChange={(e) => setDays(e.target.value)}
+            onChange={(e) => setDays(Number(e.target.value))}
             placeholder="Days"
           />
 
@@ -107,7 +129,7 @@ export default function Dashboard() {
           disabled={loading}
           className="bg-blue-600 px-6 py-2 rounded font-bold hover:bg-blue-500 transition disabled:opacity-50"
         >
-          {loading ? "Loading..." : "Analyze Weather"}
+          {loading ? "Analyzing..." : "Analyze Weather"}
         </button>
 
         {/* MAP */}
@@ -151,34 +173,39 @@ export default function Dashboard() {
             {/* CURRENT WEATHER + AI + RULES */}
             <div className="grid lg:grid-cols-3 gap-4">
 
-              <WeatherCard weather={data.weather?.data || data.weather} />
+              {/* WEATHER */}
+              <WeatherCard
+                weather={data.weather?.data ?? data.weather}
+              />
 
+              {/* RULES */}
               {data.rules && (
                 <RulesCard rules={data.rules} />
               )}
 
+              {/* AI */}
               {data.ai && (
                 <AICard ai={data.ai} />
               )}
             </div>
 
-            {/* FORECAST (WeatherCard GRID) */}
-            {data?.weather?.type === "forecast" && (
+            {/* FORECAST */}
+            {Array.isArray(forecastList) && forecastList.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-3">
                   📊 Forecast
                 </h2>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {data.weather.data?.map((item, i) => (
+                  {forecastList.map((item, i) => (
                     <WeatherCard
                       key={i}
                       weather={{
-                        date: item.date || `Day ${i + 1}`,
-                        temp: item.temp,
+                        date: item.datetime || `Day ${i + 1}`,
+                        temp: item.temperature,
                         condition: item.condition,
                         humidity: item.humidity,
-                        wind: item.wind,
+                        wind: item.wind_speed,
                       }}
                     />
                   ))}
@@ -190,9 +217,9 @@ export default function Dashboard() {
         )}
 
         {/* CHART */}
-        {data?.weather?.type === "forecast" && (
+        {Array.isArray(forecastList) && forecastList.length > 0 && (
           <div className="mt-6">
-            <WeatherChart forecast={data.weather.data} />
+            <WeatherChart forecast={forecastList} />
           </div>
         )}
 
