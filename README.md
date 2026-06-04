@@ -370,16 +370,7 @@ Frontend never touches raw API responses
 
 ---
 
-# 📈 Future Improvements
 
-* 🔴 Redis caching layer
-* 🗄 Database logging (PostgreSQL)
-* 🔔 Real-time alerts (WebSockets)
-* 🔐 JWT authentication
-* 📱 Mobile app integration
-* 🐳 Docker deployment
-
----
 
 # 👨‍💻 Author
 
