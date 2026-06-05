@@ -1,9 +1,13 @@
 import json
 import re
+import os
 import anthropic
 from core.config import settings
 
-client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+from dotenv import load_dotenv
+load_dotenv()
+
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 class AIService:

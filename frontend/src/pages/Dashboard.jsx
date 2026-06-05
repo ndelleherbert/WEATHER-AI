@@ -8,70 +8,78 @@ import WeatherChart from "../components/WeatherChart";
 import WeatherMap from "../components/WeatherMap";
 
 export default function Dashboard() {
-  const [lat, setLat] = useState(3.848);
-  const [lon, setLon] = useState(11.502);
-  const [days, setDays] = useState(1);
+  // =========================
+  // STATE (keep as strings for stability)
+  // =========================
+  const [lat, setLat] = useState("3.848");
+  const [lon, setLon] = useState("11.502");
+  const [days, setDays] = useState("1");
   const [units, setUnits] = useState("metric");
   const [mode, setMode] = useState("hybrid");
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // =========================
+  // FETCH WEATHER
+  // =========================
   const fetchWeather = async () => {
+    console.log("🔥 fetchWeather triggered");
+
     setLoading(true);
 
     try {
       const res = await analyzeWeather({
-        lat,
-        lon,
-        days,
+        lat: parseFloat(lat),
+        lon: parseFloat(lon),
+        days: parseInt(days),
         units,
         mode,
         ai_style: "detailed",
       });
 
-      // ✅ NORMALIZED RESPONSE (FIX FOR RULES / AI / HYBRID)
+      console.log("✅ RESPONSE:", res);
+
       setData({
         mode: res.mode,
         weather: res.weather,
-
-        // rules can come from:
-        // - res.rules (hybrid)
-        // - res.result (rules mode)
-        // - res.result (fallback)
         rules:
           res.rules ||
           (res.result?.risk ? res.result : null),
-
-        // ai can come from:
-        // - res.ai (hybrid)
-        // - res.result (ai mode)
         ai:
           res.ai ||
           (res.result?.summary ? res.result : null),
       });
 
     } catch (err) {
-      console.error("Weather fetch error:", err);
+      console.error("❌ Weather fetch error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
+  // =========================
+  // MAP CLICK HANDLER
+  // =========================
   const handleMapClick = (newLat, newLon) => {
-    setLat(newLat);
-    setLon(newLon);
+    setLat(newLat.toString());
+    setLon(newLon.toString());
   };
 
   const forecastList = data?.weather?.data;
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div className="min-h-screen bg-gray-950 text-white">
 
       {/* HEADER */}
       <div className="border-b border-gray-800 bg-gray-950">
         <div className="max-w-6xl mx-auto px-6 py-4">
-          <h1 className="text-2xl font-bold">🌤 Weather AI Dashboard</h1>
+          <h1 className="text-2xl font-bold">
+            🌤 Weather AI Dashboard
+          </h1>
           <p className="text-gray-400 text-sm">
             AI + Rules Engine Weather System
           </p>
@@ -82,24 +90,25 @@ export default function Dashboard() {
 
         {/* INPUTS */}
         <div className="grid md:grid-cols-5 gap-3">
+
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={lat}
-            onChange={(e) => setLat(Number(e.target.value))}
+            onChange={(e) => setLat(e.target.value)}
             placeholder="Latitude"
           />
 
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={lon}
-            onChange={(e) => setLon(Number(e.target.value))}
+            onChange={(e) => setLon(e.target.value)}
             placeholder="Longitude"
           />
 
           <input
             className="p-2 bg-gray-800 border border-gray-700 rounded"
             value={days}
-            onChange={(e) => setDays(Number(e.target.value))}
+            onChange={(e) => setDays(e.target.value)}
             placeholder="Days"
           />
 
@@ -121,6 +130,7 @@ export default function Dashboard() {
             <option value="ai">AI</option>
             <option value="hybrid">Hybrid</option>
           </select>
+
         </div>
 
         {/* BUTTON */}
@@ -170,20 +180,17 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* CURRENT WEATHER + AI + RULES */}
+            {/* WEATHER + AI + RULES */}
             <div className="grid lg:grid-cols-3 gap-4">
 
-              {/* WEATHER */}
               <WeatherCard
                 weather={data.weather?.data ?? data.weather}
               />
 
-              {/* RULES */}
               {data.rules && (
                 <RulesCard rules={data.rules} />
               )}
 
-              {/* AI */}
               {data.ai && (
                 <AICard ai={data.ai} />
               )}
