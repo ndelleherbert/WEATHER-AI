@@ -22,7 +22,7 @@ The system is designed with a **hybrid architecture combining rule-based logic a
 
 ## 2. Live Deployment
 
-- Frontend: https://your-vercel-app.vercel.app  
+- Frontend: https://weather-ai-1rby.vercel.app 
 - Backend API: https://weather-ai-5h6m.onrender.com  
 - API Reference: https://weather-ai.co/docs  
 
