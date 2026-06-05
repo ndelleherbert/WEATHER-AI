@@ -22,7 +22,7 @@ import axios from "axios";
 
 const isDev = import.meta.env.DEV;
 
-// ❌ block localhost in production
+// ❌ block localhost 
 const BASE_URL = isDev
   ? "http://localhost:8000"
   : import.meta.env.VITE_API_URL;
