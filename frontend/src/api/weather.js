@@ -18,11 +18,21 @@ export const analyzeWeather = async (payload) => {
 */
 
 
-
 import axios from "axios";
 
+const isDev = import.meta.env.DEV;
+
+// ❌ block localhost in production
+const BASE_URL = isDev
+  ? "http://localhost:8000"
+  : import.meta.env.VITE_API_URL;
+
+if (!isDev && (!BASE_URL || BASE_URL.includes("localhost"))) {
+  throw new Error("❌ Production cannot use localhost API URL");
+}
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: BASE_URL,
 });
 
 export const analyzeWeather = async (payload) => {
