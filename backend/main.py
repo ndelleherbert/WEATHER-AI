@@ -11,10 +11,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vite
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "https://weather-ai-1rby.vercel.app/"  # Vercel frontend
+        "http://localhost:5173",
+        "https://weather-ai-1rby.vercel.app",
+        "https://*.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -28,3 +27,6 @@ def home():
     return {
         "status": "Weather AI running"
     }
+
+
+
